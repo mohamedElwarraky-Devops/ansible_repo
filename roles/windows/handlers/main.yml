@@ -1,0 +1,6 @@
+- name: copy master file
+  win_copy:
+    src: master.txt
+    dest: c:/our_folder/from_master.txt
+    force: yes
+    remote_src: no

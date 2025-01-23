@@ -1,0 +1,12 @@
+---
+- name: setup linux vms
+  hosts: linux
+  become: yes
+  vars:
+    ansible_user: ansible
+  tasks:
+  - name: test connection
+    ping:
+  - name: install git
+    apt:
+      name: git

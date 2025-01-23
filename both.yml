@@ -1,0 +1,27 @@
+---
+- name: setup vms
+  hosts: all
+  
+  vars:
+    ansible_user: ansible
+  tasks:
+  - name: test connection for windows
+    win_ping:
+    when: ansible_distribution == "Microsoft Windows 10 Enterprise Evaluation" 
+  - name: install choco for windows
+    win_shell: Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
+    when: ansible_distribution == "Microsoft Windows 10 Enterprise Evaluation"
+  - name: install git for windows
+    win_chocolatey:
+      name: git.install
+      state: latest
+    when: ansible_distribution == "Microsoft Windows 10 Enterprise Evaluation"
+  - name: test connection for linux
+    ping:
+    when: ansible_distribution == "Ubuntu"
+  - name: install git for linux
+    apt:
+      name: git
+      state: absent
+    become: true
+    when: ansible_distribution == "Ubuntu"

@@ -1,0 +1,19 @@
+- name: install choco for windows
+  tags: windows,choco
+  win_shell: Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
+- name: install git for windows
+  tags: windows,git
+  win_chocolatey:
+    name: git.install
+    state: latest
+
+- name: Create our_folder
+  win_file:
+    path: c:/our_folder
+    state: directory
+  notify: copy master file
+
+- name: create a file from a jinja2 template
+  win_template:
+    src: .gitconfig.j2
+    dest: "C:\\Users\\{{ ansible_user }}\\.gitconfig"

@@ -1,0 +1,5 @@
+
+- name: install git for linux
+  tags: linux,ubuntu,git
+  apt:
+    name: git

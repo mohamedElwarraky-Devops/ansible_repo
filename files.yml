@@ -1,0 +1,55 @@
+---
+- name: setup windows vms
+  hosts: windows
+  gather_facts: no
+  tasks:
+  - name: check our_folder
+    win_stat:
+      path: c:/our_folder
+    register: our_folder
+
+  - name: remove our_folder if exists
+    win_file:
+      path: c:/our_folder
+      state: absent
+    when: our_folder.stat.exists == true
+
+  - name: Create our_folder
+    win_file:
+      path: c:/our_folder
+      state: directory
+
+  - name: download zip file
+    win_get_url:
+      url: https://github.com/mohamedElwarraky-Devops/ansible_repo/archive/refs/heads/main.zip
+      dest: c:/our_folder/repo.zip
+
+  - name: unzip repo.zip
+    win_unzip:
+      src: c:/our_folder/repo.zip
+      dest: c:/our_folder/ansible_repo
+      delete_archive: true
+
+  - name: create file
+    win_file:
+      path: c:/our_folder/text.txt
+      state: touch
+
+  - name: copy master file
+    win_copy:
+      src: utils/master.txt
+      dest: c:/our_folder/from_master.txt
+      force: yes
+      remote_src: no
+
+  - name: copy form_master.txt to ansible_repo
+    win_copy:
+      src: c:/our_folder/from_master.txt
+      dest: C:/our_folder/ansible_repo/ansible_repo-main/form_master.txt
+      force: yes
+      remote_src: yes
+
+  - name: delete from_master.txt
+    win_file:
+      path: c:/our_folder/from_master.txt
+      state: absent

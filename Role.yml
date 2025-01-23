@@ -1,0 +1,15 @@
+---
+- name: setup vms
+  hosts: all
+  roles:
+    - base
+
+- hosts: windows
+  roles:
+    - windows
+
+- hosts: linux
+  become: true
+  roles:
+    - linux
+

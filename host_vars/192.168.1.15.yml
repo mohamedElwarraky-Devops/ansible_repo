@@ -1,0 +1,2 @@
+ansible_shell_type: sh
+ansible_user: ansible

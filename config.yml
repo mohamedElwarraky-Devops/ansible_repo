@@ -1,0 +1,125 @@
+---
+- name: setup windows vms
+  hosts: windows
+  gather_facts: no
+  tasks:
+  #################################################
+  - name: Create common_files folder
+    win_file:
+      path: "C:/Users/{{ansible_user}}/common_files"
+      state: directory
+  
+  - name: Copy say_hello.bat file
+    win_copy:
+      src: say_hello.bat
+      dest: "C:/Users/{{ansible_user}}/common_files/say_hello.bat"
+      force: yes
+      remote_src: no
+  
+  - name: Create a new service
+    win_service:
+      name: Demo service
+      path: "C:/Users/{{ansible_user}}/common_files/say_hello.bat"
+      display_name: Our Demo Service
+      description: This is Our Demo Service
+  
+  - name: Set service startup mode to manual and ensure it is started
+    win_service:
+      name: Demo service
+      start_mode: manual
+      state: started
+  
+  - name: Remove a service
+    win_service:
+      name: Demo service
+      state: absent
+
+  ################################################# 
+  - name: Copy Our_shell.reg file
+    win_copy:
+      src: Our_shell.reg
+      dest: "C:/Users/{{ansible_user}}/Our_shell.reg"
+      force: yes
+      remote_src: no
+
+  - name: Merge in a registry file
+    win_regmerge:
+      path: "C:/Users/{{ansible_user}}/Our_shell.reg"
+
+  - name: Change Icon
+    win_regedit:
+      path: HKCR:\Directory\Background\shell\Our_shell
+      name: Icon
+      data: C:\Windows\system32\control.exe
+      type: string
+
+  - name: Clear the existing (Default) entry at path Our_shell/command 
+    win_regedit:
+      path: HKCR:\Directory\Background\shell\Our_shell\command
+      state: absent
+      delete_key: false
+
+  - name: Delete entire Our_shell 
+    win_regedit:
+      path: HKCR:\Directory\Background\shell\Our_shell
+      state: absent
+      delete_key: true
+
+  - name: Check if git is installed
+    win_reg_stat:
+      path: HKLM:\SOFTWARE\GitForWindows
+    register: git_reg_path
+
+  - name: Install git
+    win_chocolatey:
+      name: git.install
+      state: latest
+    when: git_reg_path.exists == false
+
+#################################################
+  
+  - name: Configure region
+    win_region:
+      location: 67 # Egypt
+      format: ar-EG
+      unicode_language: ar-EG
+    register: result
+
+  - name: Restarting 
+    win_reboot:
+    when: result.restart_required
+
+  - name: Set timezone to 'Cairo' (GMT+02:00)
+    win_timezone:
+      timezone: Egypt Standard Time
+  
+
+  #################################################
+  - name: ENV configure 
+    win_environment:
+      state: present
+      name: "{{ item.name }}"
+      value: "{{ item.value }}"
+      level: machine
+    loop:
+      - { name: 'HOME', value: 'C:\\Users\\{{ ansible_user }}' }
+      - { name: 'TEMP', value: 'C:\\temp' }
+
+  - name: Create common_files folder
+    win_file:
+      path: "C:/Users/{{ansible_user}}/common_files"
+      state: directory
+  
+  - name: Copy say_hello.bat file
+    win_copy:
+      src: say_hello.bat
+      dest: "C:/Users/{{ansible_user}}/common_files/say_hello.bat"
+      force: yes
+      remote_src: no
+
+  - name: Add bat to PATH
+    win_path:
+      elements:
+      - "C:\\Users\\{{ansible_user}}\\common_files"
+      scope: machine
+      state: present

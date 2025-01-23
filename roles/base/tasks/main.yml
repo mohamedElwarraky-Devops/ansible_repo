@@ -1,0 +1,9 @@
+- name: test connection for windows
+  tags: always
+  win_ping:
+  when: ansible_distribution == "Microsoft Windows 10 Enterprise Evaluation" 
+
+- name: test connection for linux
+  tags: always
+  ping:
+  when: ansible_distribution == "Ubuntu"
